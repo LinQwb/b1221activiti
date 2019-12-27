@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
  * @author binwenque
  *
  */
-public class parallelGateWayTest {
+public class ParallelGateWayTest {
 
 	ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
 	
