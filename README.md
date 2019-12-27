@@ -2,5 +2,7 @@
 activiti笔记
 在eclipse 中使用git
 - activiti 流程变量
+- activiti 各种历史查询
+- activiti 连线
 - activiti 排他网关
 - activiti 并行网关
