@@ -82,6 +82,15 @@ public class ReceiveTaskTest {
 		processEngine.getRuntimeService()
 			.trigger(execution2.getId());
 		
+		/**查询流程状态*/
+		ProcessInstance rpi2 = processEngine.getRuntimeService()
+			.createProcessInstanceQuery()
+			.processInstanceId(pi.getId())
+			.singleResult();
+		
+		if(rpi2 == null) {
+			System.out.println("流程正常执行！已经结束了。");
+		}
 	}
 	
 	
