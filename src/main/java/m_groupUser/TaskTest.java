@@ -1,13 +1,14 @@
 package m_groupUser;
 
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import org.activiti.engine.IdentityService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngines;
 import org.activiti.engine.history.HistoricIdentityLink;
+import org.activiti.engine.identity.Group;
+import org.activiti.engine.identity.User;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.IdentityLink;
@@ -40,8 +41,31 @@ public class TaskTest {
 			.deploy();
 		System.out.println("部署ID：" + deployment.getId());
 		System.out.println("部署名称：" + deployment.getName());
-		//部署ID：195001
-		//部署名称：任务
+		
+		/**添加用户角色组*/
+		IdentityService identityService = processEngine.getIdentityService();
+		//创建角色
+		Group group1 = identityService.newGroup("总经理");
+		//group1.setName("");
+		Group group2 = identityService.newGroup("部门经理");
+		identityService.saveGroup(group1);
+		identityService.saveGroup(group2);
+		
+		//创建用户
+		User user1 = identityService.newUser("张三");
+		User user2 = identityService.newUser("李四");
+		User user3 = identityService.newUser("王五");
+		identityService.saveUser(user1);
+		identityService.saveUser(user2);
+		identityService.saveUser(user3);
+		
+		//建立用户和角色的关联关系
+		identityService.createMembership("张三", "部门经理");
+		identityService.createMembership("李四", "部门经理");
+		identityService.createMembership("王五", "总经理");
+		
+		System.out.println("添加组织机构成功");
+		
 	}
 	
 	/**
@@ -50,15 +74,13 @@ public class TaskTest {
 	@Test
 	public void startProcessInstance() {
 		String processDefinitionKey = "task";
-		//Map<String, Object> variables = new HashMap<String, Object>();
-		//variables.put("userID", "周芷若");
-		/**启动流程实例的同时，设置流程变量，使用流程变量用来指定任务的办理人，对应task.bpmn中的#{userID}*/
 		ProcessInstance pi = processEngine.getRuntimeService()
 			.startProcessInstanceByKey(processDefinitionKey );
 		System.out.println("流程实例ID：" + pi.getId());
 		System.out.println("流程定义ID：" + pi.getProcessDefinitionId());
-		//流程实例ID：197501
-		//流程定义ID：task:4:195004
+		//流程实例ID：242501
+		//流程定义ID：task:7:240004
+
 	}
 	
 	/**
@@ -66,7 +88,7 @@ public class TaskTest {
 	 */
 	@Test
 	public void findMyPersonalTask() {
-		String assignee = "小A";
+		String assignee = "张三";
 		List<Task> list = processEngine.getTaskService()
 			.createTaskQuery()
 			.taskAssignee(assignee)
@@ -90,7 +112,7 @@ public class TaskTest {
 	 */
 	@Test
 	public void findMyGroupTask() {
-		String candidateUser = "小A";
+		String candidateUser = "李四";
 		List<Task> list = processEngine.getTaskService()
 			.createTaskQuery()
 			.taskCandidateUser(candidateUser)
@@ -149,8 +171,8 @@ public class TaskTest {
 	/**拾取任务，将组任务降为个人任务，并指定任务的办理人*/
 	@Test
 	public void claim() {
-		String userId = "小A";
-		String taskId = "197505";
+		String userId = "张三";
+		String taskId = "242505";
 		//分配的个人任务（可以分配给组任务中的成员，也可以不是）
 		processEngine.getTaskService()
 			.claim(taskId, userId);
@@ -189,7 +211,7 @@ public class TaskTest {
 	@Test
 	public void completeMyPersonalTask() {
 		//任务ID
-		String taskId = "197505";
+		String taskId = "242505";
 		processEngine.getTaskService()
 			.complete(taskId);
 		System.out.println("完成任务： 任务ID：" + taskId);
@@ -202,7 +224,7 @@ public class TaskTest {
 	public void deleteDeployment() {
 		
 		// 删除发布信息
-		String deploymentId = "32501";
+		String deploymentId = "237501";
 		// 获取仓库服务对象
 		// 1.普通删除，如果当前规则下有正在执行的流程，则抛异常
 		//processEngine.getRepositoryService() .deleteDeployment(deploymentId);
